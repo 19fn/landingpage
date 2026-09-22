@@ -11,6 +11,7 @@ A dependency-free personal work profile designed for Azure Storage Static Websit
 ├── styles.css        # Complete responsive visual system
 ├── app.js            # Navigation, filters, and progressive effects
 ├── assets/img/       # Certification badge images
+├── infrastructure/   # Azure Terraform root module
 └── internal-docs/    # Private source material, ignored by Git
 ```
 
@@ -24,7 +25,61 @@ python3 -m http.server 8000
 
 Open `http://localhost:8000`. The primary document is `index.html`; `404.html` is the Azure error document.
 
-## Publish to Azure Storage Static Website
+## Deploy with Terraform
+
+The Terraform root module under `infrastructure/terraform/` creates a resource group and an Azure StorageV2 account with Static Website enabled, then uploads the four root site files plus every badge under `assets/img/`.
+
+### Prerequisites
+
+- Terraform 1.5 or newer
+- Azure CLI
+- Permission to create resource groups and Storage Accounts in the target subscription
+
+Authenticate and select the subscription:
+
+```sh
+az login
+az account set --subscription <subscription-id>
+```
+
+Create the local variables file:
+
+```sh
+cd infrastructure/terraform
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Edit `terraform.tfvars` with the subscription ID, desired resource-group name and location, and a globally unique lowercase Storage Account name.
+
+Initialize, review, and apply:
+
+```sh
+terraform init
+terraform fmt -check
+terraform validate
+terraform plan
+terraform apply
+```
+
+Terraform creates the resource group and Storage Account, enables the `$web` container, and uploads only:
+
+- `index.html`
+- `404.html`
+- `styles.css`
+- `app.js`
+- `assets/img/**`
+
+Print the deployed URL after apply:
+
+```sh
+terraform output -raw website_url
+```
+
+Terraform state and populated `*.tfvars` files are local and ignored by Git. Review every plan before applying because `terraform destroy` will remove the resource group and all resources created inside it.
+
+## Manual Azure Deployment
+
+Terraform is the recommended deployment path. For a manual deployment:
 
 1. In the Azure portal, open the target Storage Account and enable **Static website** under **Data management**.
 2. Set the index document name to `index.html` and the error document path to `404.html`.

@@ -1,0 +1,10 @@
+subscription_id        = "00000000-0000-0000-0000-000000000000"
+resource_group_name    = "rg-fnc-profile-prod"
+resource_group_location = "eastus2"
+storage_account_name   = "stfncprofileprod"
+
+tags = {
+  application = "fnc-profile"
+  environment = "production"
+  managed_by  = "terraform"
+}

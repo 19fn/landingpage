@@ -53,6 +53,7 @@ const issuerIcons = {
 };
 
 document.querySelectorAll('.credential-card').forEach((card) => {
+  if (card.querySelector('.credential-badge')) return;
   const issuer = Object.entries(issuerIcons).find(([className]) => card.classList.contains(className))?.[1];
   if (!issuer) return;
   const icon = document.createElement('span');

@@ -573,6 +573,13 @@ h2 em,
   text-transform: uppercase;
 }
 
+.credential-badge {
+  width: 82px;
+  height: 82px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+}
+
 .issuer {
   font: 500 0.63rem var(--mono);
   letter-spacing: 0.08em;
@@ -782,6 +789,11 @@ footer {
   .credential-icon {
     width: 25px;
     height: 25px;
+  }
+
+  .credential-badge {
+    width: 72px;
+    height: 72px;
   }
 
   .contact-links {

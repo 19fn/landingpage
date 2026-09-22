@@ -10,6 +10,7 @@ A dependency-free personal work profile designed for Azure Storage Static Websit
 ├── 404.html          # Azure static website error page
 ├── styles.css        # Complete responsive visual system
 ├── app.js            # Navigation, filters, and progressive effects
+├── Makefile          # Local, Terraform, and deployment commands
 ├── assets/img/       # Certification badge images
 ├── infrastructure/   # Azure Terraform root module
 └── internal-docs/    # Private source material, ignored by Git
@@ -24,6 +25,14 @@ python3 -m http.server 8000
 ```
 
 Open `http://localhost:8000`. The primary document is `index.html`; `404.html` is the Azure error document.
+
+The equivalent Make command is:
+
+```sh
+make run
+```
+
+Use a different port with `make run PORT=8080`.
 
 ## Deploy with Terraform
 
@@ -51,14 +60,17 @@ cp terraform.tfvars.example terraform.tfvars
 
 Edit `terraform.tfvars` with the subscription ID, desired resource-group name and location, and a globally unique lowercase Storage Account name.
 
-Initialize, review, and apply:
+Initialize, format, validate, and save a plan to `infrastructure/terraform/tfplan.out`:
 
 ```sh
-terraform init
-terraform fmt -check
-terraform validate
-terraform plan
-terraform apply
+make tf-plan
+```
+
+Review the plan output, then apply that exact saved plan:
+
+```sh
+make tf-show
+make tf-apply
 ```
 
 Terraform creates the resource group and Storage Account, enables the `$web` container, and uploads only:
@@ -74,6 +86,8 @@ Print the deployed URL after apply:
 ```sh
 terraform output -raw website_url
 ```
+
+Or run `make tf-output`.
 
 Terraform state and populated `*.tfvars` files are local and ignored by Git. Review every plan before applying because `terraform destroy` will remove the resource group and all resources created inside it.
 
@@ -115,3 +129,13 @@ az storage blob upload-batch \
 ```
 
 The `internal-docs/` directory contains resume and profile source material. It is ignored by Git and must not be uploaded to the public site.
+
+After Terraform creates the Storage Account, redeploy only the current website content with Azure CLI:
+
+```sh
+make deploy
+```
+
+The command reads the Storage Account name from Terraform output. To target an existing account explicitly, use `make deploy STORAGE_ACCOUNT=<storage-account-name>`.
+
+Run `make help` to list all available commands, including validation, outputs, cleanup, and destruction.

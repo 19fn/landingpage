@@ -11,6 +11,26 @@ navigation?.querySelectorAll('a').forEach((link) => link.addEventListener('click
   menuButton?.setAttribute('aria-expanded', 'false');
 }));
 
+const vendorMatches = {
+  microsoft: ['microsoft', 'openhack'],
+};
+
+document.querySelectorAll('.vendor-tab').forEach((tab) => tab.addEventListener('click', () => {
+  const vendor = tab.dataset.vendor;
+  const matches = vendorMatches[vendor] ?? [vendor];
+
+  document.querySelectorAll('.vendor-tab').forEach((item) => {
+    const selected = item === tab;
+    item.classList.toggle('is-active', selected);
+    item.setAttribute('aria-selected', String(selected));
+  });
+
+  document.querySelectorAll('.credential-card').forEach((card) => {
+    const visible = vendor === 'all' || matches.some((vendorClass) => card.classList.contains(vendorClass));
+    card.hidden = !visible;
+  });
+}));
+
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {

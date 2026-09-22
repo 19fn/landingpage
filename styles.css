@@ -555,8 +555,7 @@ h2 em,
 
 .credential-card.microsoft,
 .credential-card.openhack,
-.credential-card.hashicorp,
-.credential-card.ef {
+.credential-card.hashicorp {
   border-top-color: var(--blue);
   color: #176394;
 }

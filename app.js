@@ -49,7 +49,6 @@ const issuerIcons = {
   microsoft: { name: 'Microsoft', glyph: 'ms' },
   linux: { name: 'The Linux Foundation', glyph: 'lf' },
   openhack: { name: 'Microsoft OpenHack', glyph: 'oh' },
-  ef: { name: 'EF Language Abroad', glyph: 'ef' },
 };
 
 document.querySelectorAll('.credential-card').forEach((card) => {

@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.4"
+
+      - name: Validate static site files
+        run: |
+          node --check app.js
+          python3 -m json.tool health.json >/dev/null
+          test -f assets/favicon.svg
+          test -f index.html
+          test -f 404.html
+          test -f styles.css
+          grep -q 'assets/favicon.svg' index.html
+
+      - name: Validate Terraform formatting and configuration
+        working-directory: infrastructure/terraform
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+
+      - name: Verify public deployment map
+        working-directory: infrastructure/terraform
+        run: |
+          terraform console <<'EOF' | grep -E 'health\.json|assets/favicon\.svg'
+          sort(keys(local.public_files))
+          EOF

@@ -143,3 +143,20 @@ make deploy
 The command reads the Storage Account name from Terraform output. To target an existing account explicitly, use `make deploy STORAGE_ACCOUNT=<storage-account-name>`.
 
 Run `make help` to list all available commands, including validation, outputs, cleanup, and destruction.
+
+## CI/CD
+
+GitHub Actions workflows are under `.github/workflows/`:
+
+- `Test` validates static files and Terraform formatting/configuration on pull requests and pushes to `develop` or `main`.
+- `Security` runs CodeQL, Gitleaks, and a weekly scheduled scan.
+- `Deploy` publishes the static site on pushes to `main` or manual dispatch. It does not run Terraform apply.
+
+Configure a GitHub Environment named `production` before enabling deployment:
+
+- Environment variable: `AZURE_STORAGE_ACCOUNT_NAME`
+- Environment secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_SUBSCRIPTION_ID`
+
+The Azure service principal must use GitHub Actions OIDC federation and have `Storage Blob Data Contributor` on the Storage Account. Environment protection rules are recommended for deploy approvals.
+
+For the `production` environment, configure the federated credential subject exactly as `repo:19fn/landingpage:environment:production`. The deployment identity does not need a client secret or Storage Account Contributor access because Terraform configures Static Website and the workflow only uploads public blobs.

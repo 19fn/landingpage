@@ -1,0 +1,74 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy static site
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.thefnc.me
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign in to Azure with OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Upload root files
+        run: |
+          for file in index.html 404.html styles.css app.js health.json; do
+            az storage blob upload \
+              --account-name "${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}" \
+              --container-name '$web' \
+              --name "$file" \
+              --file "$file" \
+              --overwrite true \
+              --content-type "$(case "$file" in
+                *.html) printf 'text/html; charset=utf-8' ;;
+                *.css) printf 'text/css; charset=utf-8' ;;
+                *.js) printf 'application/javascript; charset=utf-8' ;;
+                *.json) printf 'application/json; charset=utf-8' ;;
+              esac)" \
+              --auth-mode login
+          done
+
+      - name: Upload public assets
+        run: |
+          find assets -type f ! -name '.DS_Store' -print0 | while IFS= read -r -d '' file; do
+            blob_name="${file#assets/}"
+            case "$file" in
+              *.svg) content_type='image/svg+xml' ;;
+              *.png) content_type='image/png' ;;
+              *) content_type='application/octet-stream' ;;
+            esac
+            az storage blob upload \
+              --account-name "${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}" \
+              --container-name '$web' \
+              --name "assets/$blob_name" \
+              --file "$file" \
+              --overwrite true \
+              --content-type "$content_type" \
+              --auth-mode login
+          done
+
+      - name: Verify health endpoint
+        run: |
+          curl --fail --retry 6 --retry-delay 10 --retry-connrefused \
+            --max-time 30 https://www.thefnc.me/health.json

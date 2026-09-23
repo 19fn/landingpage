@@ -41,6 +41,12 @@ jobs:
       - name: Verify public deployment map
         working-directory: infrastructure/terraform
         run: |
-          terraform console <<'EOF' | grep -E 'health\.json|assets/favicon\.svg'
-          sort(keys(local.public_files))
-          EOF
+          printf 'sort(keys(local.public_files))\n' | terraform console \
+            -var='subscription_id=00000000-0000-0000-0000-000000000000' \
+            -var='resource_group_name=rg-ci-validation' \
+            -var='resource_group_location=eastus' \
+            -var='storage_account_name=stcivalidation123' \
+            -var='custom_domain_name=www.example.com' \
+            -var='dns_zone_name=example.com' \
+            -var='dns_zone_resource_group_name=rg-dns-ci' \
+            | grep -E 'health\.json|assets/favicon\.svg'

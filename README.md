@@ -1,4 +1,4 @@
-# Federico Cabrera Profile
+# Federico Nicolas Cabrera Profile
 
 A dependency-free personal work profile designed for Azure Storage Static Website hosting.
 
@@ -11,7 +11,8 @@ A dependency-free personal work profile designed for Azure Storage Static Websit
 ├── styles.css        # Complete responsive visual system
 ├── app.js            # Navigation, filters, and progressive effects
 ├── Makefile          # Local, Terraform, and deployment commands
-├── assets/img/       # Certification badge images
+├── assets/           # Favicon and certification badge images
+├── health.json       # Public deployment and reachability status
 ├── infrastructure/   # Azure Terraform root module
 └── internal-docs/    # Private source material, ignored by Git
 ```
@@ -26,6 +27,8 @@ python3 -m http.server 8000
 
 Open `http://localhost:8000`. The primary document is `index.html`; `404.html` is the Azure error document.
 
+Check the static health endpoint at `http://localhost:8000/health.json`. In production, use `https://www.thefnc.me/health.json`.
+
 The equivalent Make command is:
 
 ```sh
@@ -36,7 +39,7 @@ Use a different port with `make run PORT=8080`.
 
 ## Deploy with Terraform
 
-The Terraform root module under `infrastructure/terraform/` creates a resource group and an Azure StorageV2 account with Static Website enabled, then uploads the four root site files plus every badge under `assets/img/`.
+The Terraform root module under `infrastructure/terraform/` creates a resource group and an Azure StorageV2 account with Static Website enabled, then uploads the public root files plus all public assets under `assets/`.
 
 ### Prerequisites
 
@@ -79,7 +82,8 @@ Terraform creates the resource group and Storage Account, enables the `$web` con
 - `404.html`
 - `styles.css`
 - `app.js`
-- `assets/img/**`
+- `health.json`
+- `assets/**`
 
 Print the deployed URL after apply:
 
@@ -97,7 +101,7 @@ Terraform is the recommended deployment path. For a manual deployment:
 
 1. In the Azure portal, open the target Storage Account and enable **Static website** under **Data management**.
 2. Set the index document name to `index.html` and the error document path to `404.html`.
-3. Upload `index.html`, `404.html`, `styles.css`, `app.js`, and `assets/img/` to the `$web` container. The Static Website endpoint shown by Azure is the public URL.
+3. Upload `index.html`, `404.html`, `styles.css`, `app.js`, `health.json`, and `assets/` to the `$web` container. The Static Website endpoint shown by Azure is the public URL.
 
 With Azure CLI, after signing in and selecting the subscription, configure the static website and upload the public files with:
 
@@ -109,7 +113,7 @@ az storage blob service-properties update \
 	--404-document 404.html \
 	--auth-mode login
 
-for file in index.html 404.html styles.css app.js; do
+for file in index.html 404.html styles.css app.js health.json; do
 	az storage blob upload \
 		--account-name <storage-account-name> \
 		--container-name '$web' \
@@ -122,8 +126,8 @@ done
 az storage blob upload-batch \
 	--account-name <storage-account-name> \
 	--destination '$web' \
-	--destination-path assets/img \
-	--source assets/img \
+	--destination-path assets \
+	--source assets \
 	--overwrite \
 	--auth-mode login
 ```

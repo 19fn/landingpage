@@ -10,18 +10,23 @@ locals {
     "404.html",
     "styles.css",
     "app.js",
+    "health.json",
   ])
 
-  badge_files = fileset("${local.site_root}/assets/img", "**")
+  asset_files = toset([
+    for filename in fileset("${local.site_root}/assets", "**") : filename
+    if basename(filename) != ".DS_Store"
+  ])
 
   public_files = merge(
     { for filename in local.root_files : filename => "${local.site_root}/${filename}" },
-    { for filename in local.badge_files : "assets/img/${filename}" => "${local.site_root}/assets/img/${filename}" },
+    { for filename in local.asset_files : "assets/${filename}" => "${local.site_root}/assets/${filename}" },
   )
 
   content_types = {
     ".css"  = "text/css; charset=utf-8"
     ".html" = "text/html; charset=utf-8"
+    ".json" = "application/json; charset=utf-8"
     ".js"   = "application/javascript; charset=utf-8"
     ".png"  = "image/png"
     ".svg"  = "image/svg+xml"

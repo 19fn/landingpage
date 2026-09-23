@@ -5,7 +5,7 @@ TF_PLAN := tfplan.out
 PORT ?= 8000
 STORAGE_ACCOUNT ?= $(shell terraform -chdir=$(TF_DIR) output -raw storage_account_name 2>/dev/null)
 
-PUBLIC_FILES := index.html 404.html styles.css app.js
+PUBLIC_FILES := index.html 404.html styles.css app.js health.json
 
 .DEFAULT_GOAL := help
 
@@ -71,13 +71,16 @@ deploy: check-terraform check-az ## Upload the current landing page to the exist
 			--overwrite true \
 			--auth-mode login || exit 1; \
 	done
-	az storage blob upload-batch \
-		--account-name "$(STORAGE_ACCOUNT)" \
-		--destination '$$web' \
-		--destination-path assets/img \
-		--source assets/img \
-		--overwrite true \
-		--auth-mode login
+	@find assets -type f ! -name '.DS_Store' -print0 | while IFS= read -r -d '' file; do \
+		blob_name="$${file#assets/}"; \
+		az storage blob upload \
+			--account-name "$(STORAGE_ACCOUNT)" \
+			--container-name '$$web' \
+			--name "assets/$$blob_name" \
+			--file "$$file" \
+			--overwrite true \
+			--auth-mode login || exit 1; \
+	done
 	@echo "Deployed to $$(terraform -chdir=$(TF_DIR) output -raw website_url 2>/dev/null || true)"
 
 run: check-python ## Run the landing page locally (PORT=8000 by default)

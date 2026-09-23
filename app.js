@@ -66,8 +66,8 @@ function setLanguage(language) {
 
   document.documentElement.lang = language;
   document.title = language === 'es'
-    ? 'Federico Cabrera | Arquitecto de Soluciones Cloud'
-    : 'Federico Cabrera | Cloud Solutions Architect';
+    ? 'Federico Nicolas Cabrera | Arquitecto de Soluciones Cloud'
+    : 'Federico Nicolas Cabrera | Cloud Solutions Architect';
 
   if (languageToggle) {
     languageToggle.textContent = language === 'es' ? 'EN' : 'ES';

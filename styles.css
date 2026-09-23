@@ -549,19 +549,20 @@ h2 em,
 .credential-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  border: 1px solid var(--blue-line);
-  background: var(--blue-line);
+  gap: 0.75rem;
 }
 
 .credential-card {
+  --vendor-color: var(--blue);
+
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 260px;
   padding: 1.25rem;
   overflow: hidden;
-  border-top: 4px solid var(--blue);
+  border: 2px solid var(--vendor-color);
+  border-top-width: 5px;
   background: var(--white);
   color: #176394;
 }
@@ -576,15 +577,24 @@ h2 em,
 
 .credential-card.aws,
 .credential-card.linux {
-  border-top-color: var(--gold);
+  --vendor-color: var(--gold);
   color: var(--gold-dark);
 }
 
 .credential-card.microsoft,
-.credential-card.openhack,
-.credential-card.hashicorp {
-  border-top-color: var(--blue);
+.credential-card.openhack {
+  --vendor-color: var(--blue);
   color: #176394;
+}
+
+.credential-card.hashicorp {
+  --vendor-color: #7b42bc;
+  color: #5b2c8f;
+}
+
+.credential-card.linux {
+  --vendor-color: #198c69;
+  color: #17684e;
 }
 
 .credential-icon {
@@ -621,7 +631,7 @@ h2 em,
 
 .credential-card h3 span {
   display: block;
-  color: var(--muted);
+  color: inherit;
   font-weight: 500;
 }
 

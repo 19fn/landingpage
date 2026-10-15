@@ -8,8 +8,16 @@ const translations = {
     "nav-expertise": "Especialidad",
     "nav-credentials": "Credenciales",
     "nav-contact": "Contacto",
-    "hero-title": "De ideas complejas<br />a <em>sistemas cloud</em><br />que llegan a producción.",
-    "hero-summary": "Soy Federico, Arquitecto de Soluciones Cloud con experiencia en DevSecOps e ingeniería de IA. Diseño, automatizo y entrego plataformas seguras y escalables en AWS y Azure, integrando la seguridad y el cumplimiento en cada etapa.",
+    "nav-site": "Este sitio",
+    "resume-download": "CV en PDF <span aria-hidden=\"true\">↓</span>",
+    "resume-contact": "CV (PDF)",
+    "stat-subscriptions": "Suscripciones de Azure administradas",
+    "stat-ksis": "KSIs de FedRAMP 20x validados automáticamente",
+    "stat-certs": "Certificaciones de la industria",
+    "stat-containers": "Contenedores Windows migrados",
+    "hero-role": "Arquitecto de Soluciones Cloud",
+    "hero-title": "De ideas complejas a sistemas cloud que llegan a producción.",
+    "hero-summary": "Diseño, automatizo y entrego plataformas seguras y escalables en AWS y Azure, integrando la seguridad y el cumplimiento en cada etapa.",
     "hero-action": "Conoce mi historia <span aria-hidden=\"true\">↓</span>",
     "current-label": "Actualmente",
     "current-role": "Cloud Solutions Architect en Ewents",
@@ -41,8 +49,28 @@ const translations = {
     "credentials-eyebrow": "04 / Credenciales",
     "credentials-title": "Un solo muro.<br /><em>Cada hito.</em>",
     "credentials-description": "Dieciseis credenciales que reflejan el camino en arquitectura cloud, DevOps, contenedores, datos e IA. Cada parte del recorrido pertenece aqui.",
-    "contact-eyebrow": "05 / Contacto",
-    "contact-title": "Hagamos algo<br /><em>util.</em>"
+    "site-eyebrow": "05 / Este sitio",
+    "site-title": "Construido como<br /><em>producción.</em>",
+    "site-lead": "Un sitio personal hecho con HTML, CSS y JavaScript puros, sin frameworks ni proceso de build. Se publica con las mismas prácticas de infraestructura como código y DevSecOps que uso en mi trabajo.",
+    "spec-stack": "Stack",
+    "spec-hosting": "Hosting",
+    "spec-framework": "Framework",
+    "spec-none": "Ninguno",
+    "view-repo": "Ver repositorio <span aria-hidden=\"true\">↗</span>",
+    "stage-1": "Etapa 01 · Aprovisionar",
+    "stage-2": "Etapa 02 · Analizar",
+    "stage-3": "Etapa 03 · Validar",
+    "stage-4": "Etapa 04 · Desplegar",
+    "build-iac": "Terraform aprovisiona un sitio estático en Azure Storage detrás de Azure Front Door, con dominio propio y HTTPS administrado, y publica solo los archivos públicos.",
+    "build-security": "CodeQL analiza el código y Gitleaks revisa todo el historial de Git en busca de secretos en cada push y cada semana.",
+    "build-checks": "Cada pull request y cada push validan los archivos del sitio y el formato y la configuración de Terraform.",
+    "build-oidc": "GitHub Actions inicia sesión en Azure con federación OIDC, sin guardar secretos de la nube, publica con un rol de mínimo privilegio y luego verifica el health endpoint del sitio en vivo.",
+    "build-iac-title": "Infraestructura como código",
+    "build-oidc-title": "Despliegues sin contraseñas",
+    "build-security-title": "Análisis de seguridad",
+    "build-checks-title": "Controles automáticos",
+    "contact-eyebrow": "06 / Contacto",
+    "contact-title": "Hagamos algo<br /><em>útil.</em>"
   }
 };
 
@@ -64,6 +92,12 @@ function setLanguage(language) {
       element.innerHTML = translated;
     } else {
       element.textContent = translated;
+    }
+
+    if (element.matches('h2')) {
+      element.querySelectorAll('br').forEach((lineBreak) => {
+        lineBreak.replaceWith(document.createTextNode(' '));
+      });
     }
   });
 
@@ -103,6 +137,14 @@ navigation?.querySelectorAll('a').forEach((link) => link.addEventListener('click
   menuButton?.setAttribute('aria-expanded', 'false');
 }));
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && navigation?.classList.contains('is-open')) {
+    navigation.classList.remove('is-open');
+    menuButton?.setAttribute('aria-expanded', 'false');
+    menuButton?.focus();
+  }
+});
+
 const vendorMatches = {
   microsoft: ['microsoft', 'openhack'],
 };
@@ -114,7 +156,7 @@ document.querySelectorAll('.vendor-tab').forEach((tab) => tab.addEventListener('
   document.querySelectorAll('.vendor-tab').forEach((item) => {
     const selected = item === tab;
     item.classList.toggle('is-active', selected);
-    item.setAttribute('aria-selected', String(selected));
+    item.setAttribute('aria-pressed', String(selected));
   });
 
   document.querySelectorAll('.credential-card').forEach((card) => {
@@ -123,16 +165,24 @@ document.querySelectorAll('.vendor-tab').forEach((tab) => tab.addEventListener('
   });
 }));
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
+if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('is-pending');
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.reveal').forEach((element) => {
+    if (element.getBoundingClientRect().top >= window.innerHeight) {
+      element.classList.add('is-pending');
+      observer.observe(element);
     }
   });
-}, { threshold: 0.12 });
-
-document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+}
 document.querySelector('#year').textContent = new Date().getFullYear();
 
 const issuerIcons = {

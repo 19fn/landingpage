@@ -56,6 +56,7 @@ jobs:
             case "$file" in
               *.svg) content_type='image/svg+xml' ;;
               *.png) content_type='image/png' ;;
+              *.pdf) content_type='application/pdf' ;;
               *) content_type='application/octet-stream' ;;
             esac
             az storage blob upload \

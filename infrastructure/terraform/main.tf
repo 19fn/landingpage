@@ -4,6 +4,7 @@ locals {
   custom_domain_is_apex = var.custom_domain_name == var.dns_zone_name
   custom_domain_prefix  = local.custom_domain_is_apex ? "@" : trimsuffix(var.custom_domain_name, ".${var.dns_zone_name}")
   validation_record     = local.custom_domain_is_apex ? "_dnsauth" : "_dnsauth.${local.custom_domain_prefix}"
+  apex_redirect_enabled = var.redirect_apex_to_custom_domain && !local.custom_domain_is_apex
 
   root_files = toset([
     "index.html",
@@ -170,18 +171,112 @@ resource "azurerm_dns_a_record" "frontdoor_apex" {
   target_resource_id  = azurerm_cdn_frontdoor_endpoint.site.id
 }
 
+resource "azurerm_cdn_frontdoor_custom_domain" "apex" {
+  count = local.apex_redirect_enabled ? 1 : 0
+
+  name                     = "apex-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.site.id
+  host_name                = var.dns_zone_name
+
+  tls {
+    certificate_type = "ManagedCertificate"
+    minimum_version  = "TLS12"
+  }
+}
+
+resource "azurerm_dns_txt_record" "frontdoor_apex_validation" {
+  count = local.apex_redirect_enabled ? 1 : 0
+
+  name                = "_dnsauth"
+  zone_name           = data.azurerm_dns_zone.site.name
+  resource_group_name = data.azurerm_dns_zone.site.resource_group_name
+  ttl                 = 300
+
+  record {
+    value = azurerm_cdn_frontdoor_custom_domain.apex[0].validation_token
+  }
+}
+
+resource "azurerm_dns_a_record" "frontdoor_apex_redirect" {
+  count = local.apex_redirect_enabled ? 1 : 0
+
+  name                = "@"
+  zone_name           = data.azurerm_dns_zone.site.name
+  resource_group_name = data.azurerm_dns_zone.site.resource_group_name
+  ttl                 = 300
+  target_resource_id  = azurerm_cdn_frontdoor_endpoint.site.id
+}
+
+# Permanent (301) redirects to the canonical HTTPS hostname. The route's
+# built-in HTTPS redirect answers with 307, so these rules replace it.
+resource "azurerm_cdn_frontdoor_rule_set" "redirects" {
+  name                     = "redirects"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.site.id
+}
+
+resource "azurerm_cdn_frontdoor_rule" "https" {
+  name                      = "httpstocanonical"
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.redirects.id
+  order                     = 1
+  behavior_on_match         = "Stop"
+
+  conditions {
+    request_scheme_condition {
+      operator     = "Equal"
+      match_values = ["HTTP"]
+    }
+  }
+
+  actions {
+    url_redirect_action {
+      redirect_type        = "Moved"
+      redirect_protocol    = "Https"
+      destination_hostname = var.custom_domain_name
+    }
+  }
+}
+
+resource "azurerm_cdn_frontdoor_rule" "apex" {
+  count = local.apex_redirect_enabled ? 1 : 0
+
+  name                      = "apextocanonical"
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.redirects.id
+  order                     = 2
+  behavior_on_match         = "Stop"
+
+  conditions {
+    host_name_condition {
+      operator     = "Equal"
+      match_values = [var.dns_zone_name]
+      transforms   = ["Lowercase"]
+    }
+  }
+
+  actions {
+    url_redirect_action {
+      redirect_type        = "Moved"
+      redirect_protocol    = "Https"
+      destination_hostname = var.custom_domain_name
+    }
+  }
+
+  depends_on = [azurerm_cdn_frontdoor_rule.https]
+}
+
 resource "azurerm_cdn_frontdoor_route" "site" {
   name                          = "static-site"
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.site.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.site.id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.site.id]
-  cdn_frontdoor_custom_domain_ids = [
-    azurerm_cdn_frontdoor_custom_domain.site.id,
-  ]
+  cdn_frontdoor_custom_domain_ids = concat(
+    [azurerm_cdn_frontdoor_custom_domain.site.id],
+    azurerm_cdn_frontdoor_custom_domain.apex[*].id,
+  )
+  cdn_frontdoor_rule_set_ids = [azurerm_cdn_frontdoor_rule_set.redirects.id]
 
   enabled                = true
   forwarding_protocol    = "HttpsOnly"
-  https_redirect_enabled = true
+  https_redirect_enabled = false
   link_to_default_domain = true
   patterns_to_match      = ["/*"]
   supported_protocols    = ["Http", "Https"]
@@ -190,5 +285,7 @@ resource "azurerm_cdn_frontdoor_route" "site" {
     azurerm_dns_txt_record.frontdoor_validation,
     azurerm_dns_cname_record.frontdoor,
     azurerm_dns_a_record.frontdoor_apex,
+    azurerm_dns_txt_record.frontdoor_apex_validation,
+    azurerm_dns_a_record.frontdoor_apex_redirect,
   ]
 }

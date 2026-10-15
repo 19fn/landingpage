@@ -74,6 +74,12 @@ variable "dns_zone_resource_group_name" {
   }
 }
 
+variable "redirect_apex_to_custom_domain" {
+  description = "When custom_domain_name is a subdomain (such as www.example.com), also serve the zone apex through Front Door and permanently redirect it there."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Tags applied to the resource group and storage account."
   type        = map(string)

@@ -204,7 +204,11 @@ h2 em,
   position: relative;
   padding-top: 4rem;
   padding-bottom: 1.5rem;
-  background: var(--white);
+  background-color: var(--white);
+  background-image:
+    linear-gradient(rgba(36, 107, 137, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(36, 107, 137, 0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
 }
 
 .hero-copy {
@@ -685,24 +689,43 @@ footer {
   text-transform: uppercase;
 }
 
+.error-body {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.error-body .site-header {
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
 .error-page {
-  min-height: 100vh;
+  flex: 1;
   display: grid;
   align-content: center;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.error-page .error-copy {
+  max-width: 45rem;
 }
 
 .error-page h1 {
-  margin: 0;
-  font: 600 clamp(4rem, 12vw, 10rem) / 0.84 var(--serif);
+  font-size: 4.5rem;
+  line-height: 1.05;
 }
 
-.error-page h1 em {
-  color: #805900;
-}
-
-.error-page > p:not(.eyebrow) {
+.error-page .hero-summary {
   max-width: 28rem;
-  line-height: 1.65;
+  margin: 1.5rem 0 2rem;
+}
+
+@media (max-width: 450px) {
+  .error-page h1 {
+    font-size: 3rem;
+  }
 }
 
 .reveal {

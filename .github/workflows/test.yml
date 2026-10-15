@@ -29,6 +29,11 @@ jobs:
           test -f index.html
           test -f 404.html
           test -f styles.css
+          test -f robots.txt
+          test -f assets/og-image.png
+          python3 -c "import xml.dom.minidom as m; m.parse('sitemap.xml')"
+          grep -q 'rel="canonical"' index.html
+          grep -q 'og:image' index.html
           grep -q 'assets/favicon.svg' index.html
 
       - name: Validate Terraform formatting and configuration

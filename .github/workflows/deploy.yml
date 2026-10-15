@@ -33,7 +33,7 @@ jobs:
 
       - name: Upload root files
         run: |
-          for file in index.html 404.html styles.css app.js health.json; do
+          for file in index.html 404.html styles.css app.js health.json robots.txt sitemap.xml; do
             az storage blob upload \
               --account-name "${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}" \
               --container-name '$web' \
@@ -45,6 +45,8 @@ jobs:
                 *.css) printf 'text/css; charset=utf-8' ;;
                 *.js) printf 'application/javascript; charset=utf-8' ;;
                 *.json) printf 'application/json; charset=utf-8' ;;
+                *.txt) printf 'text/plain; charset=utf-8' ;;
+                *.xml) printf 'application/xml; charset=utf-8' ;;
               esac)" \
               --auth-mode login
           done

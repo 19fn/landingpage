@@ -13,6 +13,8 @@ A dependency-free personal work profile designed for Azure Storage Static Websit
 ├── Makefile          # Local, Terraform, and deployment commands
 ├── assets/           # Favicon and certification badge images
 ├── health.json       # Public deployment and reachability status
+├── robots.txt        # Crawler rules and sitemap location
+├── sitemap.xml       # Sitemap for search engines
 ├── infrastructure/   # Azure Terraform root module
 └── internal-docs/    # Private source material, ignored by Git
 ```
@@ -83,6 +85,8 @@ Terraform creates the resource group and Storage Account, enables the `$web` con
 - `styles.css`
 - `app.js`
 - `health.json`
+- `robots.txt`
+- `sitemap.xml`
 - `assets/**`
 
 Print the deployed URL after apply:
@@ -101,7 +105,7 @@ Terraform is the recommended deployment path. For a manual deployment:
 
 1. In the Azure portal, open the target Storage Account and enable **Static website** under **Data management**.
 2. Set the index document name to `index.html` and the error document path to `404.html`.
-3. Upload `index.html`, `404.html`, `styles.css`, `app.js`, `health.json`, and `assets/` to the `$web` container. The Static Website endpoint shown by Azure is the public URL.
+3. Upload `index.html`, `404.html`, `styles.css`, `app.js`, `health.json`, `robots.txt`, `sitemap.xml`, and `assets/` to the `$web` container. The Static Website endpoint shown by Azure is the public URL.
 
 With Azure CLI, after signing in and selecting the subscription, configure the static website and upload the public files with:
 
@@ -113,7 +117,7 @@ az storage blob service-properties update \
 	--404-document 404.html \
 	--auth-mode login
 
-for file in index.html 404.html styles.css app.js health.json; do
+for file in index.html 404.html styles.css app.js health.json robots.txt sitemap.xml; do
 	az storage blob upload \
 		--account-name <storage-account-name> \
 		--container-name '$web' \

@@ -5,7 +5,7 @@ TF_PLAN := tfplan.out
 PORT ?= 8000
 STORAGE_ACCOUNT ?= $(shell terraform -chdir=$(TF_DIR) output -raw storage_account_name 2>/dev/null)
 
-PUBLIC_FILES := index.html 404.html styles.css app.js health.json
+PUBLIC_FILES := index.html 404.html styles.css app.js health.json robots.txt sitemap.xml
 
 .DEFAULT_GOAL := help
 

@@ -11,6 +11,8 @@ locals {
     "styles.css",
     "app.js",
     "health.json",
+    "robots.txt",
+    "sitemap.xml",
   ])
 
   asset_files = toset([
@@ -28,6 +30,8 @@ locals {
     ".html" = "text/html; charset=utf-8"
     ".json" = "application/json; charset=utf-8"
     ".pdf"  = "application/pdf"
+    ".txt"  = "text/plain; charset=utf-8"
+    ".xml"  = "application/xml; charset=utf-8"
     ".js"   = "application/javascript; charset=utf-8"
     ".png"  = "image/png"
     ".svg"  = "image/svg+xml"

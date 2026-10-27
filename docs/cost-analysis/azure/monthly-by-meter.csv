@@ -1,0 +1,37 @@
+billing_month,resource_group,service,meter,resource,usage_quantity,cost_usd
+2026-09,<site-resource-group>,Azure Front Door Service,Standard Base Fees,<front-door-profile>,0.258065,9.032258
+2026-09,<dns-resource-group>,Azure DNS,Public Zone,<dns-zone>,0.260069,0.130034
+2026-09,<site-resource-group>,Storage,All Other Operations,<storage-account>,5.616500,0.022466
+2026-09,<site-resource-group>,Azure Front Door Service,Standard Data Transfer Out,<front-door-profile>,0.035869,0.003301
+2026-09,<site-resource-group>,Azure Front Door Service,Standard Requests,<front-door-profile>,0.150400,0.001808
+2026-09,<dns-resource-group>,Azure DNS,Public Queries,<dns-zone>,0.003689,0.001476
+2026-09,<site-resource-group>,Storage,Hot Read Operations,<storage-account>,0.153600,0.000614
+2026-09,<site-resource-group>,Storage,Hot LRS Write Operations,<storage-account>,0.003100,0.000155
+2026-09,<site-resource-group>,Azure Front Door Service,Standard Data Transfer In,<front-door-profile>,0.001398,0.000080
+2026-09,<site-resource-group>,Bandwidth,Intra Continent Data Transfer Out,<storage-account>,0.001568,0.000031
+2026-09,<site-resource-group>,Storage,LRS List and Create Container Operations,<storage-account>,0.000200,0.000010
+2026-09,<site-resource-group>,Storage,Class 2 Operations,<storage-account>,0.001700,0.000007
+2026-09,<site-resource-group>,Storage,Hot LRS Data Stored,<storage-account>,0.000191,0.000004
+2026-09,<site-resource-group>,Storage,Read Operations,<storage-account>,0.002600,0.000004
+2026-09,<site-resource-group>,Bandwidth,Inter Continent Data Transfer Out - NAM or EU To Any,<storage-account>,0.010037,0.000000
+2026-09,<site-resource-group>,Bandwidth,Standard Data Transfer In,<storage-account>,0.001400,0.000000
+2026-09,<site-resource-group>,Bandwidth,Standard Data Transfer Out,<storage-account>,0.002287,0.000000
+2026-10,<site-resource-group>,Azure Front Door Service,Standard Base Fees,<front-door-profile>,0.830645,29.072581
+2026-10,<dns-resource-group>,Azure DNS,Public Zone,<dns-zone>,0.829301,0.414651
+2026-10,<site-resource-group>,Storage,All Other Operations,<storage-account>,18.761900,0.075048
+2026-10,<site-resource-group>,Azure Front Door Service,Standard Requests,<front-door-profile>,0.971700,0.009590
+2026-10,<site-resource-group>,Azure Front Door Service,Standard Data Transfer Out,<front-door-profile>,0.059055,0.005358
+2026-10,<dns-resource-group>,Azure DNS,Public Queries,<dns-zone>,0.009448,0.003779
+2026-10,<site-resource-group>,Storage,Hot Read Operations,<storage-account>,0.349500,0.001398
+2026-10,<site-resource-group>,Bandwidth,Intra Continent Data Transfer Out,<storage-account>,0.006373,0.000127
+2026-10,<site-resource-group>,Azure Front Door Service,Standard Data Transfer In,<front-door-profile>,0.002832,0.000123
+2026-10,<site-resource-group>,Storage,Hot LRS Write Operations,<storage-account>,0.001200,0.000060
+2026-10,<site-resource-group>,Storage,Hot LRS Data Stored,<storage-account>,0.000879,0.000018
+2026-10,<site-resource-group>,Storage,LRS List and Create Container Operations,<storage-account>,0.000100,0.000005
+2026-10,<site-resource-group>,Storage,Class 2 Operations,<storage-account>,0.000300,0.000001
+2026-10,<site-resource-group>,Storage,Read Operations,<storage-account>,0.000500,0.000001
+2026-10,<site-resource-group>,Bandwidth,Inter Continent Data Transfer In - NAM or EU To Any,<storage-account>,0.003488,0.000000
+2026-10,<site-resource-group>,Bandwidth,Inter Continent Data Transfer Out - NAM or EU To Any,<storage-account>,0.016788,0.000000
+2026-10,<site-resource-group>,Bandwidth,Intra Continent Data Transfer In,<storage-account>,0.000152,0.000000
+2026-10,<site-resource-group>,Bandwidth,Standard Data Transfer In,<storage-account>,0.000533,0.000000
+2026-10,<site-resource-group>,Bandwidth,Standard Data Transfer Out,<storage-account>,0.001137,0.000000

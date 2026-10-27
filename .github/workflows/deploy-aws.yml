@@ -1,0 +1,61 @@
+---
+name: Deploy (AWS)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy static site to AWS
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ vars.AWS_CLOUDFRONT_DOMAIN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign in to AWS with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Upload site files
+        run: |
+          {
+            printf '%s\0' index.html 404.html styles.css app.js health.json robots.txt sitemap.xml
+            find assets -type f ! -name '.DS_Store' -print0
+          } | while IFS= read -r -d '' file; do
+            case "$file" in
+              *.html) content_type='text/html; charset=utf-8' ;;
+              *.css) content_type='text/css; charset=utf-8' ;;
+              *.js) content_type='application/javascript; charset=utf-8' ;;
+              *.json) content_type='application/json; charset=utf-8' ;;
+              *.txt) content_type='text/plain; charset=utf-8' ;;
+              *.xml) content_type='application/xml; charset=utf-8' ;;
+              *.svg) content_type='image/svg+xml' ;;
+              *.png) content_type='image/png' ;;
+              *.pdf) content_type='application/pdf' ;;
+              *) content_type='application/octet-stream' ;;
+            esac
+            aws s3 cp "$file" "s3://${{ vars.AWS_S3_BUCKET }}/$file" \
+              --content-type "$content_type" \
+              --only-show-errors
+          done
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths '/*' \
+            --query 'Invalidation.Id' \
+            --output text
+
+      - name: Verify health endpoint
+        run: |
+          curl --fail --retry 6 --retry-delay 10 --retry-connrefused \
+            --max-time 30 https://${{ vars.AWS_CLOUDFRONT_DOMAIN }}/health.json

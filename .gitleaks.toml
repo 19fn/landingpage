@@ -1,0 +1,5 @@
+[allowlist]
+  description = "Public health endpoint declaration"
+  paths = [
+    '''health\.json''',
+  ]

@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.4"
+
+      - name: Validate static site files
+        run: |
+          node --check app.js
+          python3 -m json.tool health.json >/dev/null
+          test -f assets/favicon.svg
+          test -f index.html
+          test -f 404.html
+          test -f styles.css
+          test -f robots.txt
+          test -f assets/og-image.png
+          python3 -c "import xml.dom.minidom as m; m.parse('sitemap.xml')"
+          grep -q 'rel="canonical"' index.html
+          grep -q 'og:image' index.html
+          grep -q 'assets/favicon.svg' index.html
+
+      - name: Validate Azure Terraform formatting and configuration
+        working-directory: infrastructure/azure
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate AWS Terraform formatting and configuration
+        working-directory: infrastructure/aws
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+
+      - name: Verify public deployment map
+        working-directory: infrastructure/azure
+        run: |
+          grep -q '"health.json"' main.tf
+          grep -q 'fileset("${local.site_root}/assets", "\*\*")' main.tf
+          grep -q 'basename(filename) != ".DS_Store"' main.tf
+          test -f ../../health.json
+          test -f ../../assets/favicon.svg

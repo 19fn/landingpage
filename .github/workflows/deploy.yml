@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Hosting target to deploy to
+        type: choice
+        options:
+          - aws
+          - azure
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  # Manual runs use the selected input; pushes use the DEPLOY_TARGET repository variable.
+  aws:
+    if: (inputs.target || vars.DEPLOY_TARGET) == 'aws'
+    uses: ./.github/workflows/deploy-aws.yml
+
+  azure:
+    if: (inputs.target || vars.DEPLOY_TARGET) == 'azure'
+    uses: ./.github/workflows/deploy-azure.yml
+    secrets: inherit

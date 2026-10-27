@@ -195,9 +195,8 @@ For the `Deploy (AWS)` workflow, add these variables to the `production` GitHub 
 
 GitHub Actions workflows are under `.github/workflows/`:
 
-- `Test` validates static files and Terraform formatting/configuration on pull requests and pushes to `develop` or `main`.
-- `Security` runs CodeQL, Gitleaks, and a weekly scheduled scan.
-- `Deploy` publishes the static site on pushes to `main` or manual dispatch. It does not run Terraform apply.
+- `CI` runs on pull requests, pushes to `develop`, and a weekly schedule. It calls the reusable `test.yml` (static files and Terraform formatting/configuration) and `security.yml` (CodeQL and Gitleaks).
+- `Deploy` publishes the static site on pushes to `main` or manual dispatch. It runs `CI` first and deploys only if it passes. It does not run Terraform apply.
 
 `Deploy` picks the hosting target and calls the matching reusable workflow, `deploy-aws.yml` or `deploy-azure.yml`. Pushes use the repository variable `DEPLOY_TARGET` (`aws` or `azure`); switch hosting with `gh variable set DEPLOY_TARGET --body azure`. Manual runs from the Actions tab deploy to the target selected in the run form.
 

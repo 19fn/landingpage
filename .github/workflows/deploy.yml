@@ -15,19 +15,32 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
 jobs:
+  ci:
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/ci.yaml
+
   # Manual runs use the selected input; pushes use the DEPLOY_TARGET repository variable.
   aws:
+    needs: ci
     if: (inputs.target || vars.DEPLOY_TARGET) == 'aws'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/deploy-aws.yml
 
   azure:
+    needs: ci
     if: (inputs.target || vars.DEPLOY_TARGET) == 'azure'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/deploy-azure.yml
     secrets: inherit

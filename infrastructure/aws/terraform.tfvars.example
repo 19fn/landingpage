@@ -1,0 +1,10 @@
+aws_profile                        = "personal"
+bucket_name                        = "example-com-site-000000000000"
+custom_domain_name                 = "www.example.com"
+dns_zone_name                      = "example.com"
+
+tags = {
+  application = "fnc-profile"
+  environment = "production"
+  managed_by  = "terraform"
+}

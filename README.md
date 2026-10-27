@@ -15,7 +15,7 @@ A dependency-free personal work profile designed for Azure Storage Static Websit
 ├── health.json       # Public deployment and reachability status
 ├── robots.txt        # Crawler rules and sitemap location
 ├── sitemap.xml       # Sitemap for search engines
-├── infrastructure/   # Azure Terraform root module
+├── infrastructure/   # Terraform roots: azure/ and aws/
 └── internal-docs/    # Private source material, ignored by Git
 ```
 
@@ -41,7 +41,7 @@ Use a different port with `make run PORT=8080`.
 
 ## Deploy with Terraform
 
-The Terraform root module under `infrastructure/terraform/` creates a resource group and an Azure StorageV2 account with Static Website enabled, then uploads the public root files plus all public assets under `assets/`.
+The Terraform root module under `infrastructure/azure/` creates a resource group and an Azure StorageV2 account with Static Website enabled, then uploads the public root files plus all public assets under `assets/`.
 
 ### Prerequisites
 
@@ -59,23 +59,23 @@ az account set --subscription <subscription-id>
 Create the local variables file:
 
 ```sh
-cd infrastructure/terraform
+cd infrastructure/azure
 cp terraform.tfvars.example terraform.tfvars
 ```
 
 Edit `terraform.tfvars` with the subscription ID, desired resource-group name and location, and a globally unique lowercase Storage Account name.
 
-Initialize, format, validate, and save a plan to `infrastructure/terraform/tfplan.out`:
+Initialize, format, validate, and save a plan to `infrastructure/azure/tfplan.out`:
 
 ```sh
-make tf-plan
+make azure-tf-plan
 ```
 
 Review the plan output, then apply that exact saved plan:
 
 ```sh
-make tf-show
-make tf-apply
+make azure-tf-show
+make azure-tf-apply
 ```
 
 Terraform creates the resource group and Storage Account, enables the `$web` container, and uploads only:
@@ -95,7 +95,7 @@ Print the deployed URL after apply:
 terraform output -raw website_url
 ```
 
-Or run `make tf-output`.
+Or run `make azure-tf-output`.
 
 Terraform state and populated `*.tfvars` files are local and ignored by Git. Review every plan before applying because `terraform destroy` will remove the resource group and all resources created inside it.
 
@@ -141,12 +141,55 @@ The `internal-docs/` directory contains resume and profile source material. It i
 After Terraform creates the Storage Account, redeploy only the current website content with Azure CLI:
 
 ```sh
-make deploy
+make azure-deploy
 ```
 
-The command reads the Storage Account name from Terraform output. To target an existing account explicitly, use `make deploy STORAGE_ACCOUNT=<storage-account-name>`.
+The command reads the Storage Account name from Terraform output. To target an existing account explicitly, use `make azure-deploy AZURE_STORAGE_ACCOUNT=<storage-account-name>`.
 
 Run `make help` to list all available commands, including validation, outputs, cleanup, and destruction.
+
+## AWS Hosting (S3 + CloudFront)
+
+`infrastructure/aws/` is a separate Terraform root with its own state that hosts the site on AWS. It creates:
+
+- A private S3 bucket readable only by CloudFront (Origin Access Control), with the same public files uploaded
+- A CloudFront distribution with HTTP→HTTPS 301, a CloudFront Function that 301s the apex to `www`, and `404.html` as the error page
+- An ACM certificate (us-east-1) for `www` and the apex
+- A Route 53 hosted zone with alias records for both hostnames
+- A GitHub Actions OIDC provider and a deploy role limited to the bucket and cache invalidations
+
+ACM validates the certificate through the Route 53 zone, so the zone must be delegated at the registrar before the certificate (and therefore CloudFront) can be created. Deploy in this order.
+
+Sign in and create the local variables file:
+
+```sh
+aws login --profile personal
+cd infrastructure/aws
+cp terraform.tfvars.example terraform.tfvars
+```
+
+1. Create only the hosted zone and print its nameservers:
+
+   ```sh
+   terraform init
+   terraform apply -target=aws_route53_zone.site
+   terraform output route53_name_servers
+   ```
+
+2. At the domain registrar, replace the current nameservers with the four Route 53 nameservers. The site is unreachable from this point until step 3 finishes.
+
+3. Plan and apply the full stack. The apply waits on certificate validation until the delegation propagates, then creates CloudFront and the DNS records:
+
+   ```sh
+   make aws-tf-plan
+   make aws-tf-apply
+   ```
+
+4. Verify `https://www.thefnc.me/health.json`, that `http://www.thefnc.me` and `https://thefnc.me` both 301 to `https://www.thefnc.me`, and that a missing path returns the 404 page.
+
+Redeploy content after changes with `make aws-deploy`. Run `make aws-tf-output` to show the bucket, distribution, and deploy role.
+
+For the `Deploy (AWS)` workflow, add these variables to the `production` GitHub Environment from the Terraform outputs: `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`, and `AWS_CLOUDFRONT_DOMAIN` (hostname only, for example `www.thefnc.me`).
 
 ## CI/CD
 
@@ -155,6 +198,8 @@ GitHub Actions workflows are under `.github/workflows/`:
 - `Test` validates static files and Terraform formatting/configuration on pull requests and pushes to `develop` or `main`.
 - `Security` runs CodeQL, Gitleaks, and a weekly scheduled scan.
 - `Deploy` publishes the static site on pushes to `main` or manual dispatch. It does not run Terraform apply.
+
+`Deploy` picks the hosting target and calls the matching reusable workflow, `deploy-aws.yml` or `deploy-azure.yml`. Pushes use the repository variable `DEPLOY_TARGET` (`aws` or `azure`); switch hosting with `gh variable set DEPLOY_TARGET --body azure`. Manual runs from the Actions tab deploy to the target selected in the run form.
 
 Configure a GitHub Environment named `production` before enabling deployment:
 

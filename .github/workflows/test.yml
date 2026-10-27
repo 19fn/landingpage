@@ -36,15 +36,22 @@ jobs:
           grep -q 'og:image' index.html
           grep -q 'assets/favicon.svg' index.html
 
-      - name: Validate Terraform formatting and configuration
-        working-directory: infrastructure/terraform
+      - name: Validate Azure Terraform formatting and configuration
+        working-directory: infrastructure/azure
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate AWS Terraform formatting and configuration
+        working-directory: infrastructure/aws
         run: |
           terraform fmt -check -recursive
           terraform init -backend=false
           terraform validate
 
       - name: Verify public deployment map
-        working-directory: infrastructure/terraform
+        working-directory: infrastructure/azure
         run: |
           grep -q '"health.json"' main.tf
           grep -q 'fileset("${local.site_root}/assets", "\*\*")' main.tf

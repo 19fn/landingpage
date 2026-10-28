@@ -1124,9 +1124,10 @@ footer {
 .pipeline-head {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem 1rem;
   flex-wrap: wrap;
-  padding: 0.9rem 1.6rem;
+  padding: 0 1.6rem;
   border-bottom: 1px solid rgba(114, 169, 207, 0.4);
   color: #c6deef;
   font: 0.66rem var(--mono);
@@ -1134,15 +1135,161 @@ footer {
   text-transform: uppercase;
 }
 
-.pipeline-head span:last-child::before {
+.pipeline-head > span {
+  padding: 0.9rem 0;
+}
+
+.deploy-switch {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.deploy-tab {
+  padding: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #8fb3c9;
+  cursor: pointer;
+  font: inherit;
+  text-transform: inherit;
+}
+
+.deploy-tab:hover {
+  color: var(--white);
+}
+
+.deploy-tab[aria-selected="true"] {
+  border-bottom-color: var(--gold);
+  color: var(--white);
+}
+
+.deploy-status {
+  margin-left: 0.35rem;
+  color: #8fb3c9;
+}
+
+#deploy-tab-aws .deploy-status::before {
   content: "";
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-right: 0.5rem;
+  margin-right: 0.4rem;
   border-radius: 50%;
   background: var(--gold);
   vertical-align: 1px;
+}
+
+.deploy-bill {
+  padding: 1.6rem;
+  border-top: 1px solid rgba(114, 169, 207, 0.4);
+}
+
+.deploy-bill:first-child {
+  border-top: 0;
+}
+
+.bill-figure {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bill-label {
+  color: var(--gold);
+  font: 0.64rem var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bill-figure strong {
+  font: 700 3rem / 1 var(--sans);
+}
+
+.bill-figure > span:last-child {
+  color: #c6deef;
+  font-size: 0.8rem;
+}
+
+.bill-meter {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin: 1.4rem 0 0.8rem;
+}
+
+.bill-segment {
+  min-width: 4px;
+  border-radius: 4px;
+}
+
+.bill-segment.is-fixed {
+  flex: 98.3;
+  background: var(--gold);
+}
+
+.bill-segment.is-usage {
+  flex: 1.7;
+  background: #5f7983;
+}
+
+.bill-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  color: #dbeeff;
+  font: 0.68rem var(--mono);
+  text-transform: uppercase;
+}
+
+.bill-legend li::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 0.45rem;
+  border-radius: 2px;
+  vertical-align: 0;
+}
+
+.bill-legend .is-fixed::before {
+  background: var(--gold);
+}
+
+.bill-legend .is-usage::before {
+  background: #5f7983;
+}
+
+.bill-legend strong {
+  margin-left: 0.3rem;
+  color: var(--white);
+  font-weight: 500;
+}
+
+.bill-link span {
+  margin-left: 0.4rem;
+}
+
+.deploy-bill p {
+  max-width: 34rem;
+  margin: 0 0 0.6rem;
+  color: #dbeeff;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.bill-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--white);
+  font: 500 0.7rem var(--mono);
+  text-decoration: underline;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 4px;
+  text-transform: uppercase;
 }
 
 .pipeline-stages {
@@ -1272,5 +1419,11 @@ footer {
 
   .pipeline-stages > li {
     padding-left: 2rem;
+  }
+
+  .pipeline-head,
+  .deploy-bill {
+    padding-right: 1.1rem;
+    padding-left: 1.1rem;
   }
 }

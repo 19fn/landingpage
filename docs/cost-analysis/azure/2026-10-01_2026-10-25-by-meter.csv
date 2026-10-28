@@ -1,0 +1,19 @@
+resource_group,service,meter,resource,usage_quantity,cost_usd
+<site-resource-group>,Azure Front Door Service,Standard Base Fees,<front-door-profile>,0.806452,28.225806
+<dns-resource-group>,Azure DNS,Public Zone,<dns-zone>,0.806452,0.403226
+<site-resource-group>,Storage,All Other Operations,<storage-account>,18.269800,0.073079
+<site-resource-group>,Azure Front Door Service,Standard Requests,<front-door-profile>,0.951400,0.009407
+<site-resource-group>,Azure Front Door Service,Standard Data Transfer Out,<front-door-profile>,0.056498,0.005148
+<dns-resource-group>,Azure DNS,Public Queries,<dns-zone>,0.010472,0.004189
+<site-resource-group>,Storage,Hot Read Operations,<storage-account>,0.341100,0.001364
+<site-resource-group>,Bandwidth,Intra Continent Data Transfer Out,<storage-account>,0.006373,0.000127
+<site-resource-group>,Azure Front Door Service,Standard Data Transfer In,<front-door-profile>,0.002761,0.000121
+<site-resource-group>,Storage,Hot LRS Write Operations,<storage-account>,0.001200,0.000060
+<site-resource-group>,Storage,Hot LRS Data Stored,<storage-account>,0.000841,0.000017
+<site-resource-group>,Storage,Class 2 Operations,<storage-account>,0.000300,0.000001
+<site-resource-group>,Storage,Read Operations,<storage-account>,0.000300,0.000000
+<site-resource-group>,Bandwidth,Inter Continent Data Transfer In - NAM or EU To Any,<storage-account>,0.003404,0.000000
+<site-resource-group>,Bandwidth,Inter Continent Data Transfer Out - NAM or EU To Any,<storage-account>,0.016684,0.000000
+<site-resource-group>,Bandwidth,Intra Continent Data Transfer In,<storage-account>,0.000152,0.000000
+<site-resource-group>,Bandwidth,Standard Data Transfer In,<storage-account>,0.000533,0.000000
+<site-resource-group>,Bandwidth,Standard Data Transfer Out,<storage-account>,0.001137,0.000000

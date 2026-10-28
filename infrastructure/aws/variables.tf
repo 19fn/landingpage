@@ -57,10 +57,10 @@ variable "price_class" {
   }
 }
 
-variable "github_repository" {
-  description = "GitHub repository (owner/name) allowed to assume the deploy role."
+variable "github_oidc_subject_prefix" {
+  description = "OIDC subject prefix of the GitHub repository allowed to assume the deploy role. The repository uses immutable subjects, which include the owner and repository IDs; read it with 'gh api repos/OWNER/REPO/actions/oidc/customization/sub'."
   type        = string
-  default     = "19fn/landingpage"
+  default     = "repo:19fn@69449278/landingpage@1382181071"
 }
 
 variable "github_environment" {

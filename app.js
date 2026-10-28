@@ -54,17 +54,30 @@ const translations = {
     "site-lead": "Un sitio personal hecho con HTML, CSS y JavaScript puros, sin frameworks ni proceso de build. Se publica con las mismas prácticas de infraestructura como código y DevSecOps que uso en mi trabajo.",
     "spec-stack": "Stack",
     "spec-hosting": "Hosting",
-    "spec-framework": "Framework",
-    "spec-none": "Ninguno",
     "view-repo": "Ver repositorio <span aria-hidden=\"true\">↗</span>",
     "stage-1": "Etapa 01 · Aprovisionar",
     "stage-2": "Etapa 02 · Analizar",
     "stage-3": "Etapa 03 · Validar",
     "stage-4": "Etapa 04 · Desplegar",
-    "build-iac": "Terraform aprovisiona un sitio estático en Azure Storage detrás de Azure Front Door, con dominio propio y HTTPS administrado, y publica solo los archivos públicos.",
+    "build-iac": "Terraform aprovisionaba un sitio estático en Azure Storage detrás de Azure Front Door, con dominio propio y HTTPS administrado, y publicaba solo los archivos públicos.",
+    "build-iac-aws": "Terraform aprovisiona un bucket S3 privado detrás de CloudFront con Origin Access Control, un certificado de ACM, DNS en Route 53 y una CloudFront Function que redirige el dominio raíz a www.",
     "build-security": "CodeQL analiza el código y Gitleaks revisa todo el historial de Git en busca de secretos en cada push y cada semana.",
-    "build-checks": "Cada pull request y cada push validan los archivos del sitio y el formato y la configuración de Terraform.",
-    "build-oidc": "GitHub Actions inicia sesión en Azure con federación OIDC, sin guardar secretos de la nube, publica con un rol de mínimo privilegio y luego verifica el health endpoint del sitio en vivo.",
+    "build-checks": "Cada pull request y cada push validan los archivos del sitio y el formato y la configuración de Terraform. Los despliegues ejecutan los mismos controles antes, así que nada se publica si uno falla.",
+    "build-oidc": "GitHub Actions iniciaba sesión en Azure con federación OIDC, sin guardar secretos de la nube, publicaba con un rol de mínimo privilegio y luego verificaba el health endpoint del sitio en vivo.",
+    "build-oidc-aws": "GitHub Actions inicia sesión en AWS con federación OIDC, sin guardar secretos de la nube, sincroniza los archivos con S3 usando un rol de mínimo privilegio, invalida la caché de CloudFront y luego verifica el health endpoint del sitio en vivo.",
+    "deploy-tab-aws": "v2 · AWS <span class=\"deploy-status\">en vivo</span>",
+    "deploy-tab-azure": "v1 · Azure <span class=\"deploy-status\">retirado</span>",
+    "deploy-tab-cost": "Costo",
+    "bill-label-azure": "v1 · Azure · 1–25 oct 2026",
+    "bill-label-aws": "v2 · AWS · 1–25 nov 2026",
+    "bill-pending": "Midiendo",
+    "bill-pending-note": "Los mismos 25 días en noviembre, para comparar en igualdad de condiciones. Costo real cuando cierre el período.",
+    "bill-azure-note": "Costo real según Azure Cost Management.",
+    "bill-meter-label": "Tarifa base de Front Door: 98,3% del costo. DNS, almacenamiento y tráfico: 1,7%.",
+    "bill-fixed": "Tarifa base de Front Door",
+    "bill-usage": "DNS, almacenamiento y tráfico",
+    "bill-azure-finding": "El tráfico real, unas 9,5 mil solicitudes en esos 25 días, costó $0,015. Casi todo lo demás era una tarifa fija por mantener una CDN encendida.",
+    "bill-link": "Ver el análisis de costos <span aria-hidden=\"true\">↗</span>",
     "build-iac-title": "Infraestructura como código",
     "build-oidc-title": "Despliegues sin contraseñas",
     "build-security-title": "Análisis de seguridad",
@@ -81,8 +94,16 @@ const originals = new Map(
   ]),
 );
 
+const originalLabels = new Map(
+  [...document.querySelectorAll('[data-i18n-label]')].map((element) => [element, element.getAttribute('aria-label')]),
+);
+
 function setLanguage(language) {
   const dictionary = language === 'es' ? translations.es : {};
+
+  originalLabels.forEach((original, element) => {
+    element.setAttribute('aria-label', dictionary[element.dataset.i18nLabel] ?? original);
+  });
 
   originals.forEach((original, element) => {
     const key = element.dataset.i18nHtml ?? element.dataset.i18n;
@@ -164,6 +185,28 @@ document.querySelectorAll('.vendor-tab').forEach((tab) => tab.addEventListener('
     card.hidden = !visible;
   });
 }));
+
+const deployTabs = [...document.querySelectorAll('.deploy-tab')];
+
+function selectDeployTab(tab) {
+  deployTabs.forEach((item) => {
+    const selected = item === tab;
+    item.setAttribute('aria-selected', String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+  });
+}
+
+deployTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectDeployTab(tab));
+  tab.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    const step = event.key === 'ArrowRight' ? 1 : -1;
+    const next = deployTabs[(index + step + deployTabs.length) % deployTabs.length];
+    selectDeployTab(next);
+    next.focus();
+  });
+});
 
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const observer = new IntersectionObserver((entries) => {

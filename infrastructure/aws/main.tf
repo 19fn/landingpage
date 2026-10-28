@@ -132,6 +132,12 @@ resource "aws_s3_object" "site" {
   source       = each.value
   etag         = filemd5(each.value)
   content_type = lookup(local.content_types, lower(regex("\\.[^.]+$", each.key)), "application/octet-stream")
+
+  # Terraform seeds the bucket; after that the Deploy workflow owns the content,
+  # and its uploads replace the objects without the default tags.
+  lifecycle {
+    ignore_changes = [etag, tags, tags_all]
+  }
 }
 
 # DNS and certificate

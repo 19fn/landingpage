@@ -187,7 +187,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 4. Verify `https://www.thefnc.me/health.json`, that `http://www.thefnc.me` and `https://thefnc.me` both 301 to `https://www.thefnc.me`, and that a missing path returns the 404 page.
 
-Redeploy content after changes with `make aws-deploy`. Run `make aws-tf-output` to show the bucket, distribution, and deploy role.
+Terraform only uploads the site files when it first creates them. After that it ignores their content and tags, and content updates go through `make aws-deploy` or the `Deploy` workflow. Run `make aws-tf-output` to show the bucket, distribution, and deploy role.
 
 For the `Deploy (AWS)` workflow, add these variables to the `production` GitHub Environment from the Terraform outputs: `AWS_DEPLOY_ROLE_ARN`, `AWS_S3_BUCKET`, `AWS_CLOUDFRONT_DISTRIBUTION_ID`, and `AWS_CLOUDFRONT_DOMAIN` (hostname only, for example `www.thefnc.me`).
 

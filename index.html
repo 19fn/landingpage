@@ -148,19 +148,52 @@
           <p class="site-lead" data-i18n="site-lead">A personal site built with plain HTML, CSS, and JavaScript, with no framework or build step. It ships through the same infrastructure-as-code and DevSecOps practices I use at work.</p>
           <dl class="site-specs">
             <div><dt data-i18n="spec-stack">Stack</dt><dd translate="no">HTML · CSS · JavaScript</dd></div>
-            <div><dt data-i18n="spec-hosting">Hosting</dt><dd translate="no">Azure Storage + Front Door</dd></div>
-            <div><dt data-i18n="spec-framework">Framework</dt><dd data-i18n="spec-none">None</dd></div>
+            <div><dt data-i18n="spec-hosting">Hosting</dt><dd translate="no">AWS S3 + CloudFront</dd></div>
           </dl>
           <a class="button button-primary" href="https://github.com/19fn/landingpage" target="_blank" rel="noreferrer" data-i18n-html="view-repo">View repository <span aria-hidden="true">↗</span></a>
         </div>
         <div class="pipeline reveal">
-          <div class="pipeline-head" translate="no"><span>19fn / landingpage</span><span>main</span></div>
-          <ol class="pipeline-stages">
-            <li><span class="stage-label" data-i18n="stage-1">Stage 01 · Provision</span><strong data-i18n="build-iac-title">Infrastructure as code</strong><p data-i18n="build-iac">Terraform provisions an Azure Storage static website behind Azure Front Door, with a custom domain and managed HTTPS, and publishes only the public files.</p><ul translate="no"><li>Terraform</li><li>Azure Front Door</li></ul></li>
+          <div class="pipeline-head" translate="no">
+            <span>19fn / landingpage</span>
+            <div class="deploy-switch" role="tablist" aria-label="Deployment">
+              <button class="deploy-tab" id="deploy-tab-aws" type="button" role="tab" aria-selected="true" aria-controls="deploy-aws" data-i18n-html="deploy-tab-aws">v2 · AWS <span class="deploy-status">live</span></button>
+              <button class="deploy-tab" id="deploy-tab-azure" type="button" role="tab" aria-selected="false" aria-controls="deploy-azure" tabindex="-1" data-i18n-html="deploy-tab-azure">v1 · Azure <span class="deploy-status">retired</span></button>
+              <button class="deploy-tab" id="deploy-tab-cost" type="button" role="tab" aria-selected="false" aria-controls="deploy-cost" tabindex="-1" data-i18n="deploy-tab-cost">Cost</button>
+            </div>
+          </div>
+          <div class="deploy-panel" id="deploy-aws" role="tabpanel" aria-labelledby="deploy-tab-aws">
+            <ol class="pipeline-stages">
+            <li><span class="stage-label" data-i18n="stage-1">Stage 01 · Provision</span><strong data-i18n="build-iac-title">Infrastructure as code</strong><p data-i18n="build-iac-aws">Terraform provisions a private S3 bucket behind CloudFront with Origin Access Control, an ACM certificate, Route 53 DNS, and a CloudFront Function that redirects the apex domain to www.</p><ul translate="no"><li>Terraform</li><li>CloudFront</li><li>S3</li></ul></li>
             <li><span class="stage-label" data-i18n="stage-2">Stage 02 · Scan</span><strong data-i18n="build-security-title">Security scanning</strong><p data-i18n="build-security">CodeQL analyzes the code and Gitleaks scans the full Git history for secrets on every push and every week.</p><ul translate="no"><li>CodeQL</li><li>Gitleaks</li></ul></li>
-            <li><span class="stage-label" data-i18n="stage-3">Stage 03 · Validate</span><strong data-i18n="build-checks-title">Automated checks</strong><p data-i18n="build-checks">Every pull request and push validates the site files and the Terraform formatting and configuration.</p><ul translate="no"><li>GitHub Actions</li><li>terraform validate</li></ul></li>
-            <li><span class="stage-label" data-i18n="stage-4">Stage 04 · Deploy</span><strong data-i18n="build-oidc-title">Passwordless deploys</strong><p data-i18n="build-oidc">GitHub Actions signs in to Azure with OIDC federation, so no cloud secrets are stored, uploads with a least-privilege role, and then checks the live site's health endpoint.</p><ul translate="no"><li>OIDC</li><li>Least privilege</li></ul></li>
-          </ol>
+            <li><span class="stage-label" data-i18n="stage-3">Stage 03 · Validate</span><strong data-i18n="build-checks-title">Automated checks</strong><p data-i18n="build-checks">Every pull request and push validates the site files and the Terraform formatting and configuration. Deploys run the same checks first, so nothing ships if one fails.</p><ul translate="no"><li>GitHub Actions</li><li>terraform validate</li></ul></li>
+            <li><span class="stage-label" data-i18n="stage-4">Stage 04 · Deploy</span><strong data-i18n="build-oidc-title">Passwordless deploys</strong><p data-i18n="build-oidc-aws">GitHub Actions signs in to AWS with OIDC federation, so no cloud secrets are stored, syncs the files to S3 with a least-privilege role, invalidates the CloudFront cache, and then checks the live site's health endpoint.</p><ul translate="no"><li>OIDC</li><li>Least privilege</li></ul></li>
+            </ol>
+          </div>
+          <div class="deploy-panel" id="deploy-azure" role="tabpanel" aria-labelledby="deploy-tab-azure" hidden>
+            <ol class="pipeline-stages">
+            <li><span class="stage-label" data-i18n="stage-1">Stage 01 · Provision</span><strong data-i18n="build-iac-title">Infrastructure as code</strong><p data-i18n="build-iac">Terraform provisioned an Azure Storage static website behind Azure Front Door, with a custom domain and managed HTTPS, and published only the public files.</p><ul translate="no"><li>Terraform</li><li>Azure Front Door</li></ul></li>
+            <li><span class="stage-label" data-i18n="stage-2">Stage 02 · Scan</span><strong data-i18n="build-security-title">Security scanning</strong><p data-i18n="build-security">CodeQL analyzes the code and Gitleaks scans the full Git history for secrets on every push and every week.</p><ul translate="no"><li>CodeQL</li><li>Gitleaks</li></ul></li>
+            <li><span class="stage-label" data-i18n="stage-3">Stage 03 · Validate</span><strong data-i18n="build-checks-title">Automated checks</strong><p data-i18n="build-checks">Every pull request and push validates the site files and the Terraform formatting and configuration. Deploys run the same checks first, so nothing ships if one fails.</p><ul translate="no"><li>GitHub Actions</li><li>terraform validate</li></ul></li>
+            <li><span class="stage-label" data-i18n="stage-4">Stage 04 · Deploy</span><strong data-i18n="build-oidc-title">Passwordless deploys</strong><p data-i18n="build-oidc">GitHub Actions signed in to Azure with OIDC federation, so no cloud secrets were stored, uploaded with a least-privilege role, and then checked the live site's health endpoint.</p><ul translate="no"><li>OIDC</li><li>Least privilege</li></ul></li>
+            </ol>
+          </div>
+          <div class="deploy-panel" id="deploy-cost" role="tabpanel" aria-labelledby="deploy-tab-cost" hidden>
+            <div class="deploy-bill">
+              <div class="bill-figure"><span class="bill-label" data-i18n="bill-label-azure">v1 · Azure · Oct 1–25, 2026</span><strong translate="no">$28.72</strong><span data-i18n="bill-azure-note">Actual cost from Azure Cost Management.</span></div>
+              <div class="bill-meter" role="img" aria-label="Front Door base fee: 98.3% of the bill. DNS, storage, and traffic: 1.7%." data-i18n-label="bill-meter-label">
+                <span class="bill-segment is-fixed"></span><span class="bill-segment is-usage"></span>
+              </div>
+              <ul class="bill-legend">
+                <li class="is-fixed"><span data-i18n="bill-fixed">Front Door base fee</span> <strong>98.3%</strong></li>
+                <li class="is-usage"><span data-i18n="bill-usage">DNS, storage, and traffic</span> <strong>1.7%</strong></li>
+              </ul>
+              <p data-i18n="bill-azure-finding">Real traffic, about 9.5K requests in those 25 days, cost $0.015. Almost everything else was a flat fee for keeping a CDN running.</p>
+              <a class="bill-link" href="https://github.com/19fn/landingpage/blob/main/docs/cost-analysis/azure/README.md" target="_blank" rel="noreferrer" data-i18n-html="bill-link">Read the cost analysis <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="deploy-bill">
+              <div class="bill-figure"><span class="bill-label" data-i18n="bill-label-aws">v2 · AWS · Nov 1–25, 2026</span><strong data-i18n="bill-pending">Measuring</strong><span data-i18n="bill-pending-note">The same 25 days in November, for a like-for-like comparison. Actual cost once the window closes.</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

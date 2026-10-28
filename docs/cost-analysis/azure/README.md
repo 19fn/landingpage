@@ -17,6 +17,23 @@ Actual cost of the Azure-hosted landing page (`<custom-domain>`), pulled from th
 
 **Steady-state run rate:** about $1.149/day, which is **about $35.60 for a 31-day month** and **about $419/year**.
 
+## Comparison window: Oct 1–25, 2026
+
+A fixed 25-day window of complete days, so the AWS stack can be measured over the same days in November (Nov 1–25, 2026) and compared like for like. Pulled 2026-10-27; all 25 days are final.
+
+| Category | Oct 1–25 | Share |
+|---|---:|---:|
+| Front Door (base fee $28.23, requests + data transfer $0.015) | $28.24 | 98.3% |
+| DNS (zone $0.40, queries $0.004) | $0.41 | 1.4% |
+| Storage + bandwidth | $0.07 | 0.3% |
+| **Total** | **$28.72** | |
+
+- **Daily average:** $1.149 (range $1.148–$1.152). The flat base fee keeps every day nearly identical.
+- **Traffic:** about 9.5K Front Door requests and 0.06 GB out over the window.
+- **Storage operations:** about 183K, almost all Front Door health probes.
+
+Files: `2026-10-01_2026-10-25-by-meter.csv` (cost and usage per meter) and `2026-10-01_2026-10-25-daily.csv` (cost per day and service).
+
 ## Where the money goes
 
 | Resource | Meter | Cost/day | Cost/month (31d) | Share |
@@ -38,10 +55,11 @@ Without the Front Door base fee, the Azure footprint would cost about **$0.60/mo
 
 ## AWS comparison (estimate)
 
-The planned AWS stack in `infrastructure/aws/` (S3 + CloudFront + ACM + Route 53) has no fixed CDN fee. At current traffic it's expected to cost about **$0.51/month**: $0.50 for the Route 53 hosted zone, with S3, CloudFront, and ACM within free tiers or under $0.01. That saves about **$35/month, or about $420/year**.
+The planned AWS stack in `infrastructure/aws/` (S3 + CloudFront + ACM + Route 53) has no fixed CDN fee. At current traffic it's expected to cost about **$0.51/month**: $0.50 for the Route 53 hosted zone, with S3, CloudFront, and ACM within free tiers or under $0.01. That saves about **$35/month, or about $420/year**. Confirm with actual AWS cost for Nov 1–25, 2026, against the $28.72 Azure baseline above.
 
 ## Files
 
+- `2026-10-01_2026-10-25-by-meter.csv` and `2026-10-01_2026-10-25-daily.csv`: the Oct 1–25 comparison window
 - `monthly-by-meter.csv`: monthly cost and usage per resource group, service, meter, and resource
 - `daily-by-service.csv`: daily cost per service
 - `pull-costs.sh`: re-runs the queries (requires `az login` on the subscription; set `SUBSCRIPTION_ID`, `SITE_RESOURCE_GROUP`, and `DNS_RESOURCE_GROUP`)
